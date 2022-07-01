@@ -64,12 +64,12 @@ class Reservation {
     }
   }
 
+  /**returns a list of the top ten customerIds based on number of reservations */
   static async getTopTenCustomers() {
-    debugger;
     const results = await db.query(
-      `SELECT id, customer_id AS "customerId", COUNT(*)
+      `SELECT customer_id AS "customerId", COUNT(*)
            FROM reservations
-           GROUP BY customerId
+           GROUP BY customer_id
            ORDER BY COUNT(*) DESC LIMIT 10`
     );
 

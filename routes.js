@@ -16,7 +16,6 @@ const router = new express.Router();
 //=customer.search
 //
 router.get("/", async function (req, res, next) {
-  debugger;
   if (req.query.search) {
     const customers = await Customer.search(req.query.search);
     return res.render("customer_list.html", { customers });
@@ -40,6 +39,18 @@ router.post("/add/", async function (req, res, next) {
   await customer.save();
 
   return res.redirect(`/${customer.id}/`);
+});
+
+/** Finds top then customers */
+
+router.get("/top-ten/", async function (req, res) {
+  const topTenIds = await Reservation.getTopTenCustomers();
+
+  const customersPromises = topTenIds.map(async (id) => await Customer.get(id));
+
+  const customers = await Promise.all(customersPromises);
+
+  return res.render("customer_top_ten.html", { customers });
 });
 
 /** Show a customer, given their ID. */
@@ -92,13 +103,7 @@ router.post("/:id/add-reservation/", async function (req, res, next) {
   return res.redirect(`/${customerId}/`);
 });
 
-/** Finds top then customers */
-
-router.get("/top-ten/", async function (req, res) {
-  debugger;
-  const topTenIds = await Reservation.getTopTenCustomers();
-  const customers = topTenIds.map((id) => Customer.get(id));
-  return res.render("customer_list.html", { customers });
-});
-
 module.exports = router;
+
+
+
