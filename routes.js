@@ -31,7 +31,7 @@ router.get("/add/", async function (req, res, next) {
   return res.render("customer_new_form.html");
 });
 
-/** Handle adding a new customer. */
+/** Handle adding a new customer. */ //more info
 
 router.post("/add/", async function (req, res, next) {
   const { firstName, lastName, phone, notes } = req.body;
@@ -44,11 +44,7 @@ router.post("/add/", async function (req, res, next) {
 /** Finds top then customers */
 
 router.get("/top-ten/", async function (req, res) {
-  const topTenIds = await Reservation.getTopTenCustomers();
-
-  const customersPromises = topTenIds.map(async (id) => await Customer.get(id));
-
-  const customers = await Promise.all(customersPromises);
+  const customers = await Customer.getTopTenCustomers();
 
   return res.render("customer_top_ten.html", { customers });
 });

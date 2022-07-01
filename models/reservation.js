@@ -64,17 +64,7 @@ class Reservation {
     }
   }
 
-  /**returns a list of the top ten customerIds based on number of reservations */
-  static async getTopTenCustomers() {
-    const results = await db.query(
-      `SELECT customer_id AS "customerId", COUNT(*)
-           FROM reservations
-           GROUP BY customer_id
-           ORDER BY COUNT(*) DESC LIMIT 10`
-    );
 
-    return results.rows.map((row) => row.customerId);
-  }
 }
 
 module.exports = Reservation;

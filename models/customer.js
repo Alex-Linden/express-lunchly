@@ -14,7 +14,6 @@ class Customer {
     this.lastName = lastName;
     this.phone = phone;
     this.notes = notes;
-    this.fullName = this.fullName();
   }
 
   /**returns full name of the customer */
@@ -72,8 +71,8 @@ class Customer {
                phone,
                notes
            FROM customers
-           WHERE LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1 `,
-      ["%" + name.toLowerCase() + "%"]
+           WHERE first_name ILIKE $1 OR last_name ILIKE $1 `,
+      ["%" + name + "%"]
     );
     const customers = results.rows;
     if (customers[0] === undefined) {
@@ -82,6 +81,24 @@ class Customer {
       throw err;
     }
     return customers.map((c) => new Customer(c));
+  }
+
+
+  /**returns a list of the top ten customerIds based on number of reservations */
+  static async getTopTenCustomers() {
+    const results = await db.query(
+      `SELECT customer_id AS "customerId", COUNT(*)
+           FROM reservations
+           GROUP BY customer_id
+           ORDER BY COUNT(*) DESC LIMIT 10`
+    );
+
+    const customerIds = results.rows.map((row) => row.customerId);
+    debugger;
+    const customersPromises = customerIds.map(async (id) => await Customer.get(id));
+
+    const customers = await Promise.all(customersPromises);
+    return customers;
   }
 
   /** get all reservations for this customer. */
