@@ -3,6 +3,7 @@
 /** Routes for Lunchly */
 
 const express = require("express");
+const db = require("./db");
 
 const Customer = require("./models/customer");
 const Reservation = require("./models/reservation");
@@ -15,7 +16,7 @@ const router = new express.Router();
 //=customer.search
 //
 router.get("/", async function (req, res, next) {
-  //debugger;
+  debugger;
   if (req.query.search) {
     const customers = await Customer.search(req.query.search);
     return res.render("customer_list.html", { customers });
@@ -89,6 +90,15 @@ router.post("/:id/add-reservation/", async function (req, res, next) {
   await reservation.save();
 
   return res.redirect(`/${customerId}/`);
+});
+
+/** Finds top then customers */
+
+router.get("/top-ten/", async function (req, res) {
+  debugger;
+  const topTenIds = await Reservation.getTopTenCustomers();
+  const customers = topTenIds.map((id) => Customer.get(id));
+  return res.render("customer_list.html", { customers });
 });
 
 module.exports = router;

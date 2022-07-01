@@ -20,9 +20,7 @@ class Customer {
   /**returns full name of the customer */
   fullName() {
     return this.firstName + " " + this.lastName;
-
-  };
-
+  }
 
   /** find all customers. */
 
@@ -34,9 +32,9 @@ class Customer {
                   phone,
                   notes
            FROM customers
-           ORDER BY last_name, first_name`,
+           ORDER BY last_name, first_name`
     );
-    return results.rows.map(c => new Customer(c));
+    return results.rows.map((c) => new Customer(c));
   }
 
   /** get a customer by ID. */
@@ -50,7 +48,7 @@ class Customer {
                   notes
            FROM customers
            WHERE id = $1`,
-      [id],
+      [id]
     );
 
     const customer = results.rows[0];
@@ -64,33 +62,27 @@ class Customer {
     return new Customer(customer);
   }
 
-
   /** get a list of customers by name. */
 
   static async search(name) {
     const results = await db.query(
       `SELECT id,
-                  first_name AS "firstName",
-                  last_name  AS "lastName",
-                  phone,
-                  notes
+               first_name AS "firstName",
+               last_name  AS "lastName",
+               phone,
+               notes
            FROM customers
-           WHERE first_name = $1`,
-      [name],
+           WHERE LOWER(first_name) LIKE $1 OR LOWER(last_name) LIKE $1 `,
+      ["%" + name.toLowerCase() + "%"]
     );
-    debugger;
-    const customer = results.rows[0];
-    console.log("customer", customer);
-    console.log("results", results);
-    if (customer === undefined) {
+    const customers = results.rows;
+    if (customers[0] === undefined) {
       const err = new Error(`No such customer: ${name}`);
       err.status = 404;
       throw err;
     }
-
-    return new Customer(customer);
+    return customers.map((c) => new Customer(c));
   }
-
 
   /** get all reservations for this customer. */
 
@@ -106,7 +98,7 @@ class Customer {
         `INSERT INTO customers (first_name, last_name, phone, notes)
              VALUES ($1, $2, $3, $4)
              RETURNING id`,
-        [this.firstName, this.lastName, this.phone, this.notes],
+        [this.firstName, this.lastName, this.phone, this.notes]
       );
       this.id = result.rows[0].id;
     } else {
@@ -116,13 +108,8 @@ class Customer {
                  last_name=$2,
                  phone=$3,
                  notes=$4
-             WHERE id = $5`, [
-        this.firstName,
-        this.lastName,
-        this.phone,
-        this.notes,
-        this.id,
-      ],
+             WHERE id = $5`,
+        [this.firstName, this.lastName, this.phone, this.notes, this.id]
       );
     }
   }

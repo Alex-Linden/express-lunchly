@@ -27,17 +27,17 @@ class Reservation {
 
   static async getReservationsForCustomer(customerId) {
     const results = await db.query(
-          `SELECT id,
+      `SELECT id,
                   customer_id AS "customerId",
                   num_guests AS "numGuests",
                   start_at AS "startAt",
                   notes AS "notes"
            FROM reservations
            WHERE customer_id = $1`,
-        [customerId],
+      [customerId]
     );
 
-    return results.rows.map(row => new Reservation(row));
+    return results.rows.map((row) => new Reservation(row));
   }
 
   /**save this reservation */
@@ -45,32 +45,36 @@ class Reservation {
   async save() {
     if (this.id === undefined) {
       const result = await db.query(
-            `INSERT INTO reservations (customer_id, num_guests, start_at, notes)
+        `INSERT INTO reservations (customer_id, num_guests, start_at, notes)
              VALUES ($1, $2, $3, $4)
              RETURNING id`,
-          [this.customerId, this.numGuests, this.startAt, this.notes],
+        [this.customerId, this.numGuests, this.startAt, this.notes]
       );
       this.id = result.rows[0].id;
     } else {
       await db.query(
-            `UPDATE reservations
+        `UPDATE reservations
              SET customer_id=$1,
                  num_guests=$2,
                  start_at=$3,
                  notes=$4
-             WHERE id = $5`, [
-            this.customerId,
-            this.numGuests,
-            this.startAt,
-            this.notes,
-            this.id,
-          ],
+             WHERE id = $5`,
+        [this.customerId, this.numGuests, this.startAt, this.notes, this.id]
       );
     }
   }
 
+  static async getTopTenCustomers() {
+    debugger;
+    const results = await db.query(
+      `SELECT id, customer_id AS "customerId", COUNT(*)
+           FROM reservations
+           GROUP BY customerId
+           ORDER BY COUNT(*) DESC LIMIT 10`
+    );
 
+    return results.rows.map((row) => row.customerId);
+  }
 }
-
 
 module.exports = Reservation;
