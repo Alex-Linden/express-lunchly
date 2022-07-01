@@ -10,10 +10,19 @@ const Reservation = require("./models/reservation");
 const router = new express.Router();
 
 /** Homepage: show list of customers. */
-
+//query
+//if query parma
+//=customer.search
+//
 router.get("/", async function (req, res, next) {
-  const customers = await Customer.all();
-  return res.render("customer_list.html", { customers });
+  debugger;
+  if(req.query.search){
+    const customers = await Customer.search(req.query.search)
+    return res.render("customer_list.html", { customers })
+  } else{
+    const customers = await Customer.all();
+    return res.render("customer_list.html", { customers });
+  }
 });
 
 /** Form to add a new customer. */
